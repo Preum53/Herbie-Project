@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full bg-black text-slate-100 select-none overflow-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>Racing GPS Dashboard (VW Beetle 8/35 Specs)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&family=Teko:wght@600;700&family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #050505;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .font-digital { font-family: 'Orbitron', sans-serif; }
+        .font-lcd { font-family: 'VT323', monospace; }
+        .font-stack-num { font-family: 'Teko', 'Chakra Petch', sans-serif; font-weight: 700; }
+
+        .ft-bezel {
+            background: linear-gradient(145deg, #22252a, #0d0e11);
+            box-shadow: 
+                0 0 0 2px #333842,
+                inset 0 2px 3px rgba(255, 255, 255, 0.15),
+                inset 0 -3px 5px rgba(0, 0, 0, 0.8);
+        }
+
+        .ft-screen {
+            background-color: #08090c;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9);
+            border: 2px solid #1a1d24;
+            transition: background-color 0.1s ease;
+        }
+
+        .aem-bg {
+            background-color: #031107;
+            background-image: 
+                radial-gradient(#052e16 15%, transparent 16%),
+                radial-gradient(#041f0f 15%, transparent 16%);
+            background-size: 16px 16px;
+            background-position: 0 0, 8px 8px;
+        }
+
+        /* Carbon Fiber Pattern Background */
+        .stack-bg {
+            background-color: #0f1115;
+            background-image: 
+                linear-gradient(27deg, #151515 5px, transparent 5px),
+                linear-gradient(207deg, #151515 5px, transparent 5px),
+                linear-gradient(27deg, #222222 5px, transparent 5px),
+                linear-gradient(207deg, #222222 5px, transparent 5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px, 0 10px, 10px 0;
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.9);
+        }
+
+        .stack-housing-outer {
+            background: #111315;
+            clip-path: polygon(
+                50% 0%, 
+                92% 20%, 
+                100% 45%, 
+                100% 98%, 
+                98% 100%, 
+                2% 100%, 
+                0% 98%, 
+                0% 45%, 
+                8% 20%
+            );
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .stack-housing-inner {
+            background: #07080a;
+            clip-path: polygon(
+                50% 1%, 
+                91.5% 20.5%, 
+                99.3% 45.5%, 
+                99.3% 97.5%, 
+                97.5% 99.5%, 
+                2.5% 99.5%, 
+                0.7% 97.5%, 
+                0.7% 45.5%, 
+                8.5% 20.5%
+            );
+        }
+
+        .led-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #1a1d24;
+            border: 1px solid #0d0e11;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+            transition: all 0.08s ease;
+        }
+
+        .led-green.active {
+            background-color: #22c55e;
+            box-shadow: 0 0 12px #22c55e, inset 0 0 4px #ffffff;
+        }
+        .led-red.active {
+            background-color: #ef4444;
+            box-shadow: 0 0 12px #ef4444, inset 0 0 4px #ffffff;
+        }
+        .led-cyan.active {
+            background-color: #06b6d4;
+            box-shadow: 0 0 12px #06b6d4, inset 0 0 4px #ffffff;
+        }
+
+        .rpm-bar-container {
+            background: rgba(18, 22, 29, 0.9);
+            border: 1px solid #2a303c;
+        }
+
+        .rpm-bar-fill {
+            background: linear-gradient(90deg, 
+                #facc15 0%, 
+                #f59e0b 50%, 
+                #ef4444 85%, 
+                #dc2626 100%
+            );
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+            transition: width 0.12s linear;
+        }
+
+        .segment-bar-bg {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .g-grid {
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.6) 100%);
+        }
+
+        @keyframes warning-flash {
+            0%, 100% { opacity: 1; background-color: rgba(220, 38, 38, 0.45); }
+            50% { opacity: 0.2; background-color: transparent; }
+        }
+
+        .alert-active {
+            animation: warning-flash 0.18s infinite;
+            border-color: #ef4444 !important;
+        }
+
+        .scanline {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 0, 0, 0.3) 50%,
+                rgba(0, 0, 0, 0.3)
+            );
+            background-size: 100% 4px;
+            pointer-events: none !important;
+        }
+
+        #dash-aem .aem-rpm-sweep { left: 9% !important; right: 1% !important; top: 0 !important; height: 44% !important; }
+        #dash-aem .aem-rpm-sweep svg { overflow: visible; }
+        #dash-aem .aem-rpm-band-number {
+            fill: #ffffff !important;
+            paint-order: stroke;
+            stroke: #020602;
+            stroke-width: 8px;
+            stroke-linejoin: round;
+        }
+        #dash-aem .aem-rpm-band-number.red { fill: #ff3030 !important; }
+
+        .aem-housing {
+            background: linear-gradient(145deg, #25272a 0%, #101214 48%, #050607 100%);
+            border: 3px solid #3a3d40;
+            border-radius: 8% 8% 11% 11% / 12% 12% 15% 15%;
+            box-shadow: inset 0 2px 2px rgba(255,255,255,.16), inset 0 -10px 22px rgba(0,0,0,.9), 0 8px 24px rgba(0,0,0,.9);
+        }
+        .aem-housing::before {
+            content: "";
+            position: absolute;
+            inset: 1.2%;
+            border: 2px solid #17191b;
+            border-radius: 7% 7% 10% 10% / 11% 11% 14% 14%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .aem-display {
+            background: #07100a;
+            border: 5px solid #0d1110;
+            border-radius: 4px 4px 8px 8px;
+            box-shadow: inset 0 0 0 2px #1d2320, inset 0 0 30px rgba(0,0,0,.9), 0 2px 8px rgba(0,0,0,.8);
+        }
+        .aem-display-inner {
+            background: #020602;
+            background-image: radial-gradient(rgba(22,80,34,.16) 1px, transparent 1px);
+            background-size: 8px 8px;
+        }
+        .aem-top-leds { pointer-events:none; }
+        .aem-led { width: 18px; height: 18px; border-radius: 50%; background:#1b1e20; border:2px solid #080909; box-shadow: inset 0 2px 3px #000; opacity:.32; transition:all .08s ease; }
+        .aem-led.active { opacity:1; }
+        .aem-led.led-green.active { background:#4cff45; box-shadow:0 0 12px #22c55e, inset 0 0 4px #fff; }
+        .aem-led.led-yellow.active { background:#fff04a; box-shadow:0 0 12px #facc15, inset 0 0 4px #fff; }
+        .aem-led.led-blue.active { background:#3c5cff; box-shadow:0 0 12px #3155ff, inset 0 0 4px #fff; }
+        .aem-led.led-red.active { background:#ff3030; box-shadow:0 0 14px #ef4444, inset 0 0 4px #fff; }
+        
+        .aem-main-cell { background:rgba(0,0,0,.88); border:2px solid rgba(34,197,94,.8); border-radius:3px; text-align:center; padding:.35rem .4rem; box-shadow: inset 0 0 12px rgba(34,197,94,.22); position:relative; z-index:12; }
+        .aem-label { color:#3cff58; font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(15px,1.15vw,28px); letter-spacing:.08em; line-height:1; }
+        .aem-main-value { color:#ffffff; font-family:'Orbitron',sans-serif; font-weight:900; font-style:italic; font-size:clamp(34px,3.5vw,78px); line-height:1.05; white-space:nowrap; text-shadow:0 0 6px rgba(255,255,255,.22); }
+        .aem-small-cell { background:rgba(0,0,0,.84); border:2px solid rgba(34,197,94,.68); border-radius:2px; text-align:center; padding:.25rem .2rem; min-width:0; position:relative; z-index:12; }
+        .aem-small-cell span { display:block; color:#3cff58; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:clamp(10px,.7vw,18px); line-height:1; white-space:nowrap; }
+        .aem-main-value, .aem-small-cell strong { color:#ffffff !important; }
+        .aem-small-cell strong { display:block; color:#ffffff; font-family:'Orbitron',sans-serif; font-style:italic; font-size:clamp(18px,1.55vw,34px); line-height:1.1; }
+        .aem-alert { background:#c91414; border:2px solid #ef4444; border-radius:2px; min-height:6.5%; display:flex; align-items:center; justify-content:center; padding:.2rem .5rem; color:#fff; font-family:'Rajdhani',sans-serif; font-weight:900; font-size:clamp(14px,1.35vw,30px); font-style:italic; letter-spacing:.04em; }
+
+        #dash-aem .aem-main-values { top:42% !important; }
+        #dash-aem .aem-secondary-values { top:64% !important; bottom:auto !important; }
+        #dash-aem #aem-alert-banner { bottom:2.5% !important; min-height:7% !important; z-index:25; }
+        #dash-aem .aem-rpm-sweep { height:40% !important; }
+        #dash-aem .aem-main-cell { padding-top:.2rem !important; padding-bottom:.2rem !important; }
+        #dash-aem .aem-small-cell { padding-top:.18rem !important; padding-bottom:.18rem !important; }
+
+        .aem-logo { color:#cfd2d3; font-family:'Arial Black',Arial,sans-serif; font-size:clamp(24px,2.5vw,52px); font-weight:900; font-style:italic; letter-spacing:-.12em; text-shadow:1px 2px 0 #000; transform-origin:center; }
+
+        .stack-needle {
+            transform-origin: 250px 225px;
+            transition: transform 0.1s linear;
+        }
+
+        .stack-lcd-screen {
+            background-color: #72b22b;
+            color: #050d01;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.85);
+        }
+
+        button {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .shift-active {
+            fill: #ff0000 !important;
+            stroke: #ffffff !important;
+            filter: drop-shadow(0px 0px 12px #ff0000) drop-shadow(0px 0px 20px #ff3333);
+        }
+
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        .ft-bezel { width: 100vw !important; height: 100vh !important; min-width: 0 !important; min-height: 0 !important; box-sizing: border-box; }
+        #screen-frame { min-width: 0; min-height: 0; }
+
+        #dash-ft600, #dash-aem, #dash-stack { min-width: 0; min-height: 0; }
+        #dash-stack .stack-housing-inner { min-width: 0; min-height: 0; }
+        #dash-stack .relative.w-full.flex-1 { min-height: 0; }
+        #dash-stack .relative.w-full.flex-1 > svg { width: 100%; height: 100%; }
+        #dash-stack .stack-lcd-screen { min-height: 105px; }
+
+        #dash-ft600 { overflow: hidden; }
+        #dash-ft600 > .my-auto { flex: 1 1 auto; min-height: 0; margin-top: 8px; margin-bottom: 8px; overflow: hidden; }
+        #dash-ft600 > .grid.grid-cols-3 { flex: 0 0 auto; min-height: 0; }
+
+        #dash-aem { overflow: hidden; }
+        #screen-frame:has(#dash-aem:not(.hidden)) { background:#07090a !important; }
+        #dash-aem > .relative.w-full.h-44.sm\:h-56 { flex: 0 0 auto; }
+        #dash-aem > .grid.grid-cols-3,
+        #dash-aem > .grid.grid-cols-4,
+        #dash-aem > #aem-alert-banner { flex: 0 0 auto; }
+
+        #dash-stack .relative.w-full.flex-1 > svg {
+            width: 100%; height: 100%; transform: none;
+        }
+        @media (min-width: 2000px) and (min-height: 1200px) {
+            #dash-stack .relative.w-full.flex-1 > svg {
+                transform: scale(1.04);
+                transform-origin: center center;
+            }
+        }
+    
+        #dash-aem svg text.aem-rpm-band-number.red,
+        #dash-aem svg text[fill="#ff3030"] { fill:#ff3030 !important; color:#ff3030 !important; }
+    </style>
+
+    <style id="v13-aem-tighten">
+    #dash-aem .aem-rpm-wrap { margin-bottom: -6px !important; }
+    #dash-aem .aem-main-gauges { margin-top: -2px !important; }
+    </style>
+
+    <style>
+    #dash-aem #aem-rpm-path { stroke:#ffffff !important; stroke-width:22px !important; }
+    </style>
+</head>
+<body class="h-screen w-screen m-0 p-0 text-slate-100 overflow-hidden bg-black flex items-center justify-center">
+
+    <!-- Offline Banner -->
+    <div id="offline-banner" class="hidden fixed top-2 left-1/2 -translate-x-1/2 z-50 bg-amber-500/90 text-black px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5 pointer-events-none">
+        <i class="fa-solid fa-wifi-slash"></i>
+        <span>OFFLINE MODE</span>
+    </div>
+
+    <!-- Fullscreen Outer Container -->
+    <div class="ft-bezel w-screen h-screen min-w-full min-h-full rounded-none p-1 sm:p-2 flex flex-col justify-between relative overflow-hidden">
+        
+        <!-- Top Control Bar -->
+        <div class="flex items-center justify-between px-2 py-0.5 relative z-30 shrink-0">
+            <div class="flex items-center space-x-2">
+                <span id="brand-logo-text" class="text-slate-400 font-extrabold tracking-wider text-xs sm:text-base uppercase italic">FuelTech</span>
+                <span id="brand-badge-text" class="bg-red-600 text-white font-black px-2 py-0.5 rounded text-[10px] sm:text-xs">FT600</span>
+            </div>
+            
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button type="button" onclick="toggleDashMode()" class="px-3 py-1 rounded bg-indigo-600/80 hover:bg-indigo-500 active:scale-95 text-white border border-indigo-400 text-xs sm:text-sm font-bold transition flex items-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span id="dash-mode-text">AEM MODE</span>
+                </button>
+
+                <button type="button" id="btn-demo" onclick="toggleDemoMode()" class="px-2.5 py-1 rounded bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs sm:text-sm font-bold hover:bg-amber-500/30 active:scale-95 transition flex items-center gap-1">
+                    <i class="fa-solid fa-flask text-xs"></i>
+                    <span id="demo-text">DEMO</span>
+                </button>
+                <button type="button" id="btn-wakelock" onclick="toggleWakeLock()" class="px-2.5 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 text-xs sm:text-sm font-bold hover:bg-slate-700 active:scale-95 transition">
+                    <i id="wakelock-icon" class="fa-solid fa-lock"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bezel LED Bar -->
+        <div id="bezel-led-bar" class="flex items-center justify-center space-x-2 sm:space-x-4 my-0.5 px-2 pointer-events-none shrink-0">
+            <div id="led-1" class="led-dot led-green"></div>
+            <div id="led-2" class="led-dot led-green"></div>
+            <div id="led-3" class="led-dot led-green"></div>
+            <div id="led-4" class="led-dot led-green"></div>
+            <div id="led-5" class="led-dot led-green"></div>
+            <div id="led-6" class="led-dot led-green"></div>
+            <div id="led-7" class="led-dot led-red"></div>
+            <div id="led-8" class="led-dot led-red"></div>
+            <div id="led-9" class="led-dot led-cyan"></div>
+            <div id="led-10" class="led-dot led-cyan"></div>
+        </div>
+
+        <!-- Screen Frame -->
+        <div id="screen-frame" class="ft-screen flex-1 rounded-xl p-1 sm:p-2 flex flex-col justify-between relative overflow-hidden">
+            <div class="scanline absolute inset-0 pointer-events-none z-10 opacity-30"></div>
+
+            <!-- LAYOUT 1: FuelTech FT600 -->
+            <div id="dash-ft600" class="w-full h-full flex flex-col justify-between relative z-20">
+                <div class="space-y-1">
+                    <div class="flex items-end justify-between px-1">
+                        <div class="flex items-baseline space-x-2">
+                            <span id="ft-rpm-value" class="font-digital text-3xl sm:text-5xl font-black text-white tracking-tight">850</span>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] sm:text-xs text-slate-400 font-bold leading-none">VW 8/35 GEAR RATIO</span>
+                                <span class="text-[10px] sm:text-xs text-amber-400 font-bold leading-none tracking-wider">RPM BAR</span>
+                            </div>
+                        </div>
+                        <div id="rec-indicator" class="flex items-center space-x-1.5 px-2.5 py-1 rounded bg-red-950/60 border border-red-800/60 text-red-500 text-xs font-bold">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span>
+                            <span class="text-xs tracking-wider">REC</span>
+                        </div>
+                    </div>
+
+                    <div class="rpm-bar-container h-8 sm:h-10 rounded-xl overflow-hidden p-1 relative">
+                        <div id="ft-rpm-bar-fill" class="rpm-bar-fill h-full rounded-lg w-0"></div>
+                    </div>
+
+                    <div class="flex justify-between px-2 text-xs sm:text-sm font-mono font-bold text-slate-400">
+                        <span>0</span><span>1000</span><span>2000</span><span class="text-amber-400">3000 (SHIFT)</span><span class="text-red-500">4000</span>
+                    </div>
+                </div>
+
+                <div class="my-auto grid grid-cols-12 gap-2 sm:gap-4 items-center">
+                    <div class="col-span-4 flex flex-col items-center">
+                        <div class="relative w-28 h-28 sm:w-44 sm:h-44 rounded-full border-2 border-slate-700 g-grid flex items-center justify-center overflow-hidden">
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div class="w-full h-[1px] bg-slate-700/80"></div>
+                                <div class="h-full w-[1px] bg-slate-700/80"></div>
+                            </div>
+                            <div class="w-2/3 h-2/3 rounded-full border border-slate-800 pointer-events-none"></div>
+                            <div class="w-1/3 h-1/3 rounded-full border border-slate-800 pointer-events-none"></div>
+                            <div id="g-dot" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white shadow-[0_0_10px_#ffffff] absolute transition-all duration-100" style="transform: translate(0px, 0px);"></div>
+                        </div>
+                        <div class="mt-1 text-center">
+                            <span class="text-[10px] sm:text-xs text-amber-400 font-bold uppercase tracking-widest block">G-FORCE METER</span>
+                            <span id="g-value-text" class="font-mono text-xs text-slate-400">X: 0.0g | Y: 0.0g</span>
+                        </div>
+                    </div>
+
+                    <div class="col-span-8 flex items-center justify-around pl-2 border-l border-slate-800/80">
+                        <div class="flex flex-col items-center justify-center">
+                            <span class="text-xs sm:text-sm text-orange-400 font-bold uppercase tracking-wider">GEAR</span>
+                            <span id="ft-gear-display" class="font-digital text-6xl sm:text-8xl md:text-9xl font-black text-amber-400 leading-none">N</span>
+                            <span class="text-[10px] sm:text-xs text-slate-500 font-bold mt-1">BEETLE 4-SPD</span>
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <div class="flex items-baseline space-x-1">
+                                <span id="ft-main-speed" class="font-digital text-7xl sm:text-9xl md:text-[10rem] font-black text-white tracking-tight leading-none">0</span>
+                            </div>
+                            <div class="mt-2 flex items-center space-x-1 bg-slate-900 border border-slate-800 p-1 rounded-lg relative z-30">
+                                <button type="button" onclick="setUnit('kmh')" class="btn-u-kmh px-2.5 py-1 text-xs sm:text-sm font-bold rounded bg-amber-500 text-black">KM/H</button>
+                                <button type="button" onclick="setUnit('mph')" class="btn-u-mph px-2.5 py-1 text-xs sm:text-sm font-bold rounded text-slate-400 hover:text-white">MPH</button>
+                                <button type="button" onclick="setUnit('ms')" class="btn-u-ms px-2.5 py-1 text-xs sm:text-sm font-bold rounded text-slate-400 hover:text-white">M/S</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 flex flex-col justify-between">
+                        <span class="text-[10px] sm:text-xs font-bold text-amber-400 uppercase tracking-wider">MAX SPEED</span>
+                        <div class="flex items-baseline justify-between mt-1">
+                            <span id="ft-max-speed" class="font-digital text-xl sm:text-2xl font-bold text-white">0</span>
+                            <span class="text-[10px] sm:text-xs text-slate-500 unit-label">KM/H</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 flex flex-col justify-between">
+                        <span class="text-[10px] sm:text-xs font-bold text-amber-400 uppercase tracking-wider">AVG SPEED</span>
+                        <div class="flex items-baseline justify-between mt-1">
+                            <span id="ft-avg-speed" class="font-digital text-xl sm:text-2xl font-bold text-white">0</span>
+                            <span class="text-[10px] sm:text-xs text-slate-500 unit-label">KM/H</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/90 border border-amber-500/30 rounded-xl p-2 flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex justify-between items-center">
+                            <span id="trip-label-title" class="text-[10px] sm:text-xs font-bold text-amber-400 uppercase tracking-wider">TRIP A</span>
+                            <button type="button" onclick="switchTrip()" class="px-1.5 py-0.5 bg-amber-500/20 hover:bg-amber-500/40 active:scale-95 text-amber-300 rounded text-[10px] font-bold border border-amber-500/40 flex items-center gap-1 relative z-30">
+                                <i class="fa-solid fa-repeat text-[9px]"></i>
+                                <span>SWITCH</span>
+                            </button>
+                        </div>
+                        <div class="flex items-baseline justify-between mt-1">
+                            <span id="val-trip-dist" class="font-digital text-xl sm:text-2xl font-bold text-amber-400">0.00</span>
+                            <span class="text-[10px] sm:text-xs text-slate-500">KM</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 flex flex-col justify-between">
+                        <span class="text-[10px] sm:text-xs font-bold text-amber-400 uppercase tracking-wider">HEADING</span>
+                        <div class="flex items-baseline justify-between mt-1">
+                            <span id="val-heading" class="font-digital text-xl sm:text-2xl font-bold text-white">0° N</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 flex flex-col justify-between">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] sm:text-xs font-bold text-green-400 uppercase tracking-wider">TPS %</span>
+                            <span id="val-tps-num" class="font-mono text-xs text-green-400 font-bold">0%</span>
+                        </div>
+                        <div class="h-3.5 rounded bg-slate-950 p-0.5 mt-1 border border-slate-800 overflow-hidden">
+                            <div id="bar-tps" class="h-full bg-green-500 rounded-xs w-0 transition-all duration-150"></div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 flex flex-col justify-between">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] sm:text-xs font-bold text-orange-400 uppercase tracking-wider">GPS ACC</span>
+                            <span id="val-gps-acc" class="font-mono text-xs text-orange-400 font-bold">--</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-1 h-3.5 mt-1">
+                            <div id="sig-1" class="segment-bar-bg rounded-xs"></div>
+                            <div id="sig-2" class="segment-bar-bg rounded-xs"></div>
+                            <div id="sig-3" class="segment-bar-bg rounded-xs"></div>
+                            <div id="sig-4" class="segment-bar-bg rounded-xs"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LAYOUT 2: AEM CD-7 -->
+            <div id="dash-aem" class="w-full h-full flex flex-col justify-center items-center relative z-20 hidden p-0">
+                <div class="aem-housing w-full h-full relative flex flex-col items-center justify-between overflow-hidden">
+                    <div class="aem-top-leds absolute top-[2.2%] left-1/2 -translate-x-1/2 z-30 flex items-center justify-center gap-5 sm:gap-8">
+                        <span class="aem-led led-green"></span><span class="aem-led led-green"></span>
+                        <span class="aem-led led-yellow"></span><span class="aem-led led-yellow"></span>
+                        <span class="aem-led led-blue"></span><span class="aem-led led-blue"></span>
+                        <span class="aem-led led-blue"></span><span class="aem-led led-red"></span>
+                    </div>
+
+                    <div class="aem-display absolute left-[7%] right-[7%] top-[15%] bottom-[11%] overflow-hidden">
+                        <div class="aem-display-inner absolute inset-0">
+                            <div class="aem-rpm-sweep absolute left-[9%] right-[1%] top-0 h-[44%] overflow-visible z-5">
+                                <svg class="w-full h-full overflow-visible" viewBox="0 0 900 300" preserveAspectRatio="none" pointer-events="none">
+                                    <path d="M 55 300 Q 140 30 805 42 L 805 105 Q 145 92 58 300 Z" fill="#d9d9d9" opacity="0.98" />
+                                    <path d="M 58 300 Q 142 42 805 55" fill="none" stroke="#0b5c21" stroke-width="16" opacity="0.95" />
+                                    <path id="aem-rpm-path" d="M 58 300 Q 142 42 805 55" fill="none" stroke="#ffffff" stroke-width="22" stroke-linecap="round" filter="url(#aemWhiteGlow)" pathLength="1000" stroke-dasharray="1000" stroke-dashoffset="1000" />
+                                    <g font-family="Orbitron" font-size="30" font-weight="900" class="aem-rpm-band-number">
+                                        <text x="82" y="225">1</text>
+                                        <text x="145" y="130">2</text>
+                                        <text x="235" y="65">3</text>
+                                        <text x="335" y="38">4</text>
+                                        <text x="445" y="30">5</text>
+                                        <text x="555" y="30">6</text>
+                                        <text x="660" y="36">7</text>
+                                        <text x="735" y="45" fill="#ff3030" style="fill:#ff3030 !important;">8</text>
+                                        <text x="790" y="60" fill="#ff3030" style="fill:#ff3030 !important;">9</text>
+                                    </g>
+                                </svg>
+                            </div>
+
+                            <div class="absolute left-[4%] top-[2%] z-10 flex flex-col items-center">
+                                <span id="aem-gear-display" class="font-digital text-7xl sm:text-8xl font-black text-white italic leading-none">N</span>
+                                <span class="text-xs sm:text-sm font-black text-green-400 tracking-widest -mt-1">GEAR</span>
+                            </div>
+
+                            <div id="aem-main-values" class="aem-main-values absolute left-[13%] right-[13%] top-[48%] grid grid-cols-3 gap-3 sm:gap-5 z-10">
+                                <div class="aem-main-cell">
+                                    <div class="aem-label">RPM</div>
+                                    <div id="aem-val-rpm" class="aem-main-value">850</div>
+                                </div>
+                                <div class="aem-main-cell">
+                                    <div class="aem-label unit-label">KM/H</div>
+                                    <div id="aem-val-speed" class="aem-main-value">0</div>
+                                </div>
+                                <div class="aem-main-cell">
+                                    <div class="aem-label">AFR</div>
+                                    <div id="aem-val-afr" class="aem-main-value">14.7:1</div>
+                                </div>
+                            </div>
+
+                            <div id="aem-secondary-values" class="aem-secondary-values absolute left-[13%] right-[13%] top-[70%] grid grid-cols-4 gap-2 sm:gap-3 z-10">
+                                <div class="aem-small-cell"><span>H2O TEMP</span><strong id="aem-h2o-temp">196</strong></div>
+                                <div class="aem-small-cell"><span>H2O PRES</span><strong id="aem-h2o-pres">19.2</strong></div>
+                                <div class="aem-small-cell"><span>OIL TEMP</span><strong id="aem-oil-temp">185</strong></div>
+                                <div class="aem-small-cell"><span>OIL PRES</span><strong id="aem-oil-pres">74</strong></div>
+                                <div class="aem-small-cell"><span>MAP</span><strong id="aem-map">14.0</strong></div>
+                                <div class="aem-small-cell"><span>BATT V</span><strong id="aem-batt">13.8</strong></div>
+                                <div class="aem-small-cell"><span>THROTTLE</span><strong id="aem-tps">0%</strong></div>
+                                <div class="aem-small-cell"><span>AIR TEMP</span><strong id="aem-air-temp">122</strong></div>
+                            </div>
+
+                            <div id="aem-alert-banner" class="absolute left-[8%] right-[8%] bottom-[4%] z-20 aem-alert">
+                                <span id="aem-alert-text">SYSTEM READY - NO ALERTS</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-[1.8%] left-1/2 -translate-x-1/2 z-30 aem-logo">AEM</div>
+                </div>
+            </div>
+
+            <!-- LAYOUT 3: STACK ST8100 Dashboard -->
+            <div id="dash-stack" class="w-full h-full flex flex-col justify-center items-center relative z-20 hidden p-0">
+                <div class="stack-housing-outer w-full h-full p-1.5 sm:p-2 flex justify-center items-center relative shadow-2xl">
+                    <div class="stack-housing-inner w-full h-full p-2 sm:p-3 flex flex-col justify-between items-center relative overflow-hidden border border-slate-800/80">
+                        <div class="relative w-full flex-1 flex justify-center items-center overflow-hidden py-1">
+                            <svg class="w-full h-full overflow-visible" viewBox="80 45 340 255" preserveAspectRatio="xMidYMid meet">
+                                <path d="M 104 298 A 180 180 0 1 1 396 298" fill="none" stroke="#334155" stroke-width="2" />
+                                <path d="M 119 286 A 162 162 0 1 1 381 286" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" />
+
+                                <g stroke="#ffffff" stroke-width="3.5" stroke-linecap="round">
+                                    <line x1="119" y1="286" x2="130" y2="274" />
+                                    <line x1="94" y1="227" x2="108" y2="222" />
+                                    <line x1="94" y1="160" x2="108" y2="165" />
+                                    <line x1="119" y1="101" x2="130" y2="113" />
+                                    <line x1="174" y1="60" x2="180" y2="73" />
+                                    <line x1="250" y1="53" x2="250" y2="67" />
+                                    <line x1="326" y1="60" x2="320" y2="73" />
+                                    <line x1="381" y1="101" x2="370" y2="113" stroke="#facc15" />
+                                    <line x1="406" y1="160" x2="392" y2="165" stroke="#ef4444" />
+                                    <line x1="406" y1="227" x2="392" y2="222" stroke="#ef4444" />
+                                    <line x1="381" y1="286" x2="370" y2="274" stroke="#ef4444" />
+                                </g>
+
+                                <g class="font-stack-num" fill="#ffffff" font-size="44" text-anchor="middle" dominant-baseline="central">
+                                    <text x="158" y="258">0</text>
+                                    <text x="128" y="202">1</text>
+                                    <text x="128" y="139">2</text>
+                                    <text x="160" y="88">3</text>
+                                    <text x="216" y="64">4</text>
+                                    <text x="284" y="64">5</text>
+                                    <text x="340" y="88">6</text>
+                                    <text x="372" y="139" fill="#facc15">7</text>
+                                    <text x="372" y="202" fill="#ef4444">8</text>
+                                </g>
+                                
+                                <text x="250" y="125" fill="#facc15" font-size="18" font-weight="900" text-anchor="middle" font-family="'Chakra Petch', sans-serif">PRO-COMP PRO</text>
+                                <text x="250" y="185" fill="#ffffff" font-size="38" font-weight="900" text-anchor="middle" font-family="'Chakra Petch', sans-serif">RPM</text>
+                                <text x="250" y="206" fill="#9ca3af" font-size="11" font-weight="700" text-anchor="middle" font-family="'Rajdhani', sans-serif" letter-spacing="2">THOUSANDS</text>
+
+                                <circle cx="178" cy="233" r="12" fill="#854d0e" stroke="#facc15" stroke-width="2"/>
+                                <circle cx="178" cy="233" r="8" fill="#eab308"/>
+
+                                <circle id="stack-shift-light" cx="322" cy="233" r="15" fill="#450a0a" stroke="#ef4444" stroke-width="2" class="transition-all duration-75"/>
+
+                                <g id="stack-needle-group" class="stack-needle" style="transform: rotate(-135deg);">
+                                    <line x1="250" y1="225" x2="250" y2="60" stroke="#ef4444" stroke-width="6" stroke-linecap="round"/>
+                                    <circle cx="250" cy="225" r="18" fill="#0f172a" stroke="#334155" stroke-width="2.5"/>
+                                    <circle cx="250" cy="225" r="7" fill="#ef4444"/>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <div class="w-full flex items-center justify-between gap-2 px-1 pb-0.5 relative z-30 shrink-0">
+                            <div class="bg-amber-500 text-black font-black px-3 py-2.5 text-xs sm:text-base rounded flex flex-col items-center leading-none border border-amber-300 font-digital shadow">
+                                <span>A</span><span>U</span><span>T</span><span>O</span>
+                                <span class="mt-1">M</span><span>E</span><span>T</span><span>E</span><span>R</span>
+                            </div>
+
+                            <div class="flex-1 stack-lcd-screen rounded-xl p-2 sm:p-3 border-2 border-slate-700 shadow-inner flex flex-col justify-around min-h-[105px] font-lcd tracking-wider">
+                                <div class="flex justify-between items-center text-3xl sm:text-5xl font-bold px-2">
+                                    <div class="flex items-baseline gap-2">
+                                        <span>SPD:</span>
+                                        <span id="stack-val-speed" class="text-4xl sm:text-6xl font-black">0</span>
+                                        <span class="text-sm sm:text-xl unit-label">KM/H</span>
+                                    </div>
+                                    <div class="flex items-baseline gap-2">
+                                        <span>GEAR:</span>
+                                        <span id="stack-val-gear" class="text-4xl sm:text-6xl font-black">N</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between items-center text-xl sm:text-3xl font-bold px-2 border-t border-black/20 pt-1">
+                                    <div class="flex items-baseline gap-1">
+                                        <span>RPM:</span>
+                                        <span id="stack-val-rpm" class="text-2xl sm:text-4xl font-black">850</span>
+                                    </div>
+                                    <div class="flex items-baseline gap-1">
+                                        <span>TRIP:</span>
+                                        <span id="stack-val-trip" class="text-2xl sm:text-4xl font-black">0.00</span>
+                                        <span class="text-xs sm:text-base">KM</span>
+                                    </div>
+                                    <div class="flex items-baseline gap-1">
+                                        <span>TPS:</span>
+                                        <span id="stack-val-tps" class="text-2xl sm:text-4xl font-black">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-black border border-slate-700 text-white font-black px-3 py-2.5 text-xs sm:text-base rounded flex flex-col items-center leading-none font-digital shadow">
+                                <span class="text-red-500">S</span><span class="text-red-500">T</span><span class="text-red-500">A</span><span class="text-red-500">C</span><span class="text-red-500">K</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Control Bar -->
+        <div class="flex items-center justify-between px-2 pt-1 relative z-30 shrink-0">
+            <button type="button" onclick="openSpeedLimitModal()" class="text-xs sm:text-sm text-slate-400 hover:text-amber-400 active:scale-95 flex items-center space-x-1.5">
+                <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                <span>LIMIT: <strong id="limit-val-display" class="text-white">120</strong> <span class="unit-label">KM/H</span></span>
+            </button>
+            
+            <div id="bottom-brand-text" class="font-digital font-black text-slate-300 text-sm sm:text-base tracking-widest italic pointer-events-none">FT600</div>
+            
+            <button type="button" onclick="resetCurrentTrip()" class="text-xs sm:text-sm text-red-400 hover:text-red-300 active:scale-95 bg-red-950/40 hover:bg-red-900/50 border border-red-800/60 px-3 py-1 rounded-lg transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>RESET <span id="btn-reset-trip-name">TRIP A</span></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Speed Limit Modal -->
+    <div id="modal-speed-limit" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 max-w-xs w-full p-6 rounded-2xl border border-slate-700 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <h3 class="font-bold text-base text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    SPEED LIMIT ALERT
+                </h3>
+                <button type="button" onclick="closeSpeedLimitModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <label class="text-xs text-slate-400 block">Set threshold for visual flasher and audio alarm:</label>
+                <div class="flex items-center justify-center gap-2">
+                    <input type="number" id="input-speed-limit" value="120" class="w-28 text-center text-2xl font-digital font-bold bg-black border border-slate-700 rounded-xl py-1 text-amber-400 focus:outline-none">
+                    <span class="text-xs font-bold text-slate-400 unit-label">KM/H</span>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button type="button" onclick="saveSpeedLimit()" class="flex-1 py-2 rounded-xl bg-amber-500 text-black font-bold hover:bg-amber-400 transition text-sm">SAVE</button>
+                <button type="button" onclick="closeSpeedLimitModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 transition text-sm">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE_NAME = 'racing-beetle-v2';
+                self.addEventListener('install', (e) => { self.skipWaiting(); });
+                self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
+                self.addEventListener('fetch', (e) => {
+                    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(() => {});
+        }
+
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+        function updateNetworkStatus() {
+            const banner = document.getElementById('offline-banner');
+            if (banner) {
+                if (!navigator.onLine) banner.classList.remove('hidden');
+                else banner.classList.add('hidden');
+            }
+        }
+
+        const state = {
+            currentSpeedKmh: 0,
+            unit: 'kmh',
+            speedLimit: 120,
+            dashMode: 'FT600',
+
+            idleRpmMin: 800,
+            idleRpmMax: 900,
+            shiftLightRpm: 3000,
+            maxRpm: 4000,
+            
+            activeTrip: 'A',
+            trips: {
+                A: { distanceKm: 0, maxSpeedKmh: 0, history: [] },
+                B: { distanceKm: 0, maxSpeedKmh: 0, history: [] },
+                C: { distanceKm: 0, maxSpeedKmh: 0, history: [] }
+            },
+            
+            lastCoords: null,
+            gX: 0, gY: 0,
+
+            isDemo: false,
+            demoAngle: 0,
+            demoInterval: null,
+            wakeLock: null
+        };
+
+        const el = {
+            screenFrame: document.getElementById('screen-frame'),
+            bezelLedBar: document.getElementById('bezel-led-bar'),
+            dashFt600: document.getElementById('dash-ft600'),
+            dashAem: document.getElementById('dash-aem'),
+            dashStack: document.getElementById('dash-stack'),
+            dashModeText: document.getElementById('dash-mode-text'),
+            
+            brandLogoText: document.getElementById('brand-logo-text'),
+            brandBadgeText: document.getElementById('brand-badge-text'),
+            bottomBrandText: document.getElementById('bottom-brand-text'),
+
+            ftRpmValue: document.getElementById('ft-rpm-value'),
+            ftRpmBarFill: document.getElementById('ft-rpm-bar-fill'),
+            ftGearDisplay: document.getElementById('ft-gear-display'),
+            ftMainSpeed: document.getElementById('ft-main-speed'),
+            ftMaxSpeed: document.getElementById('ft-max-speed'),
+            ftAvgSpeed: document.getElementById('ft-avg-speed'),
+
+            aemRpmPath: document.getElementById('aem-rpm-path'),
+            aemShiftLeds: document.querySelectorAll('#dash-aem .aem-led'),
+            aemGearDisplay: document.getElementById('aem-gear-display'),
+            aemValRpm: document.getElementById('aem-val-rpm'),
+            aemValSpeed: document.getElementById('aem-val-speed'),
+            aemValAfr: document.getElementById('aem-val-afr'),
+            aemTps: document.getElementById('aem-tps'),
+            aemAlertBanner: document.getElementById('aem-alert-banner'),
+            aemAlertText: document.getElementById('aem-alert-text'),
+
+            stackNeedleGroup: document.getElementById('stack-needle-group'),
+            stackShiftLight: document.getElementById('stack-shift-light'),
+            stackValSpeed: document.getElementById('stack-val-speed'),
+            stackValGear: document.getElementById('stack-val-gear'),
+            stackValRpm: document.getElementById('stack-val-rpm'),
+            stackValTrip: document.getElementById('stack-val-trip'),
+            stackValTps: document.getElementById('stack-val-tps'),
+
+            valTripDist: document.getElementById('val-trip-dist'),
+            tripTitle: document.getElementById('trip-label-title'),
+            btnResetTripName: document.getElementById('btn-reset-trip-name'),
+            valHeading: document.getElementById('val-heading'),
+            valTpsNum: document.getElementById('val-tps-num'),
+            barTps: document.getElementById('bar-tps'),
+            valGpsAcc: document.getElementById('val-gps-acc'),
+            gDot: document.getElementById('g-dot'),
+            gValueText: document.getElementById('g-value-text'),
+            unitLabels: document.querySelectorAll('.unit-label'),
+            btnDemo: document.getElementById('btn-demo'),
+            demoText: document.getElementById('demo-text'),
+            wakelockIcon: document.getElementById('wakelock-icon')
+        };
+
+        function toggleDashMode() {
+            if (state.dashMode === 'FT600') {
+                state.dashMode = 'AEM';
+                el.dashFt600.classList.add('hidden');
+                el.dashAem.classList.remove('hidden');
+                el.dashStack.classList.add('hidden');
+                
+                el.screenFrame.className = "ft-screen flex-1 rounded-xl p-1 sm:p-2 flex flex-col justify-between relative overflow-hidden aem-bg";
+                el.bezelLedBar.classList.add('hidden');
+
+                el.dashModeText.textContent = "STACK MODE";
+                el.brandLogoText.textContent = "AEM";
+                el.brandBadgeText.textContent = "CD-7";
+                el.brandBadgeText.className = "bg-green-600 text-white font-black px-2 py-0.5 rounded text-[10px] sm:text-xs";
+                el.bottomBrandText.textContent = "AEM CD-7";
+            } else if (state.dashMode === 'AEM') {
+                state.dashMode = 'STACK';
+                el.dashFt600.classList.add('hidden');
+                el.dashAem.classList.add('hidden');
+                el.dashStack.classList.remove('hidden');
+
+                el.screenFrame.className = "ft-screen flex-1 rounded-xl p-1 sm:p-2 flex flex-col justify-between relative overflow-hidden stack-bg";
+                el.bezelLedBar.classList.add('hidden');
+
+                el.dashModeText.textContent = "FT600 MODE";
+                el.brandLogoText.textContent = "STACK";
+                el.brandBadgeText.textContent = "PRO-COMP";
+                el.brandBadgeText.className = "bg-amber-500 text-black font-black px-2 py-0.5 rounded text-[10px] sm:text-xs";
+                el.bottomBrandText.textContent = "STACK ST8100";
+            } else {
+                state.dashMode = 'FT600';
+                el.dashStack.classList.add('hidden');
+                el.dashAem.classList.add('hidden');
+                el.dashFt600.classList.remove('hidden');
+
+                el.screenFrame.className = "ft-screen flex-1 rounded-xl p-1 sm:p-2 flex flex-col justify-between relative overflow-hidden";
+                el.bezelLedBar.classList.remove('hidden');
+
+                el.dashModeText.textContent = "AEM MODE";
+                el.brandLogoText.textContent = "FuelTech";
+                el.brandBadgeText.textContent = "FT600";
+                el.brandBadgeText.className = "bg-red-600 text-white font-black px-2 py-0.5 rounded text-[10px] sm:text-xs";
+                el.bottomBrandText.textContent = "FT600";
+            }
+            renderDashboard();
+        }
+
+        let audioCtx = null;
+        function playBeep() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            } catch(e){}
+        }
+
+        function initGPS() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.watchPosition(
+                    handleGPSPosition,
+                    handleGPSError,
+                    { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+                );
+            } else {
+                updateGPSAccuracyUI(999);
+            }
+        }
+
+        function handleGPSPosition(pos) {
+            if (state.isDemo) return;
+
+            const coords = pos.coords;
+            let speedKmh = 0;
+
+            if (coords.speed !== null && !isNaN(coords.speed)) {
+                speedKmh = Math.max(0, coords.speed * 3.6);
+            } else if (state.lastCoords) {
+                const distMeters = getDistanceMeters(
+                    state.lastCoords.latitude, state.lastCoords.longitude,
+                    coords.latitude, coords.longitude
+                );
+                const timeSec = (pos.timestamp - state.lastCoords.timestamp) / 1000;
+                if (timeSec > 0) speedKmh = (distMeters / timeSec) * 3.6;
+            }
+
+            if (speedKmh < 0.5) speedKmh = 0;
+
+            if (state.lastCoords) {
+                const stepKm = getDistanceMeters(
+                    state.lastCoords.latitude, state.lastCoords.longitude,
+                    coords.latitude, coords.longitude
+                ) / 1000;
+                if (stepKm < 0.2) {
+                    state.trips.A.distanceKm += stepKm;
+                    state.trips.B.distanceKm += stepKm;
+                    state.trips.C.distanceKm += stepKm;
+                }
+            }
+
+            state.currentSpeedKmh = speedKmh;
+            state.lastCoords = { latitude: coords.latitude, longitude: coords.longitude, timestamp: pos.timestamp };
+
+            ['A', 'B', 'C'].forEach(tKey => {
+                const trip = state.trips[tKey];
+                if (speedKmh > trip.maxSpeedKmh) trip.maxSpeedKmh = speedKmh;
+                trip.history.push(speedKmh);
+            });
+
+            if (coords.heading !== null && !isNaN(coords.heading)) updateHeadingUI(coords.heading);
+            updateGPSAccuracyUI(coords.accuracy);
+            renderDashboard();
+        }
+
+        function handleGPSError() {
+            if (!state.isDemo) updateGPSAccuracyUI(999);
+        }
+
+        function getDistanceMeters(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function initAccelerometer() {
+            if (window.DeviceMotionEvent) {
+                window.addEventListener('devicemotion', (evt) => {
+                    if (state.isDemo) return;
+                    if (evt.accelerationIncludingGravity) {
+                        state.gX = (evt.accelerationIncludingGravity.x || 0) / 9.81;
+                        state.gY = (evt.accelerationIncludingGravity.y || 0) / 9.81;
+                        updateGForceUI(state.gX, state.gY);
+                    }
+                });
+            }
+        }
+
+        function updateGForceUI(gx, gy) {
+            const maxOffset = 50;
+            const posX = Math.max(-maxOffset, Math.min(maxOffset, gx * maxOffset));
+            const posY = Math.max(-maxOffset, Math.min(maxOffset, gy * maxOffset));
+
+            el.gDot.style.transform = `translate(${posX}px, ${posY}px)`;
+            el.gValueText.textContent = `X: ${gx.toFixed(1)}g | Y: ${gy.toFixed(1)}g`;
+        }
+
+        function convertSpeed(kmh) {
+            if (state.unit === 'mph') return kmh * 0.621371;
+            if (state.unit === 'ms') return kmh / 3.6;
+            return kmh;
+        }
+
+        function setUnit(unit) {
+            state.unit = unit;
+            document.querySelectorAll('.btn-u-kmh').forEach(b => b.className = unit === 'kmh' ? "px-2.5 py-1 text-xs sm:text-sm font-bold rounded bg-amber-500 text-black" : "px-2.5 py-1 text-xs sm:text-sm font-bold rounded text-slate-400 hover:text-white");
+            document.querySelectorAll('.btn-u-mph').forEach(b => b.className = unit === 'mph' ? "px-2.5 py-1 text-xs sm:text-sm font-bold rounded bg-amber-500 text-black" : "px-2.5 py-1 text-xs sm:text-sm font-bold rounded text-slate-400 hover:text-white");
+            document.querySelectorAll('.btn-u-ms').forEach(b => b.className = unit === 'ms' ? "px-2.5 py-1 text-xs sm:text-sm font-bold rounded bg-amber-500 text-black" : "px-2.5 py-1 text-xs sm:text-sm font-bold rounded text-slate-400 hover:text-white");
+
+            const labelText = unit === 'kmh' ? 'KM/H' : unit === 'mph' ? 'MPH' : 'M/S';
+            el.unitLabels.forEach(l => l.textContent = labelText);
+
+            renderDashboard();
+        }
+
+        function switchTrip() {
+            if (state.activeTrip === 'A') state.activeTrip = 'B';
+            else if (state.activeTrip === 'B') state.activeTrip = 'C';
+            else state.activeTrip = 'A';
+
+            el.tripTitle.textContent = `TRIP ${state.activeTrip}`;
+            el.btnResetTripName.textContent = `TRIP ${state.activeTrip}`;
+            renderDashboard();
+        }
+
+        function resetCurrentTrip() {
+            const trip = state.trips[state.activeTrip];
+            trip.distanceKm = 0;
+            trip.maxSpeedKmh = 0;
+            trip.history = [];
+            renderDashboard();
+        }
+
+        function renderDashboard() {
+            const currentTrip = state.trips[state.activeTrip];
+            const displaySpeed = convertSpeed(state.currentSpeedKmh);
+            const displayMax = convertSpeed(currentTrip.maxSpeedKmh);
+            
+            let avgKmh = 0;
+            if (currentTrip.history.length > 0) {
+                avgKmh = currentTrip.history.reduce((a, b) => a + b, 0) / currentTrip.history.length;
+            }
+            const displayAvg = convertSpeed(avgKmh);
+
+            const speed = state.currentSpeedKmh;
+            let currentGear = 'N';
+            let calculatedRpm = 0;
+
+            // ปรับปรุงเงื่อนไขความเร็วและเกียร์ใหม่ตามที่กำหนด
+            if (speed < 0.5) {
+                currentGear = 'N';
+                const time = Date.now() / 200;
+                const idleCenter = 850;
+                const idleAmplitude = 50;
+                const wave = Math.sin(time) + (Math.random() * 0.2 - 0.1);
+                calculatedRpm = Math.round(idleCenter + (wave * idleAmplitude));
+                calculatedRpm = Math.max(800, Math.min(900, calculatedRpm));
+            } else if (speed >= 0.5 && speed < 20) {
+                currentGear = '1';
+                calculatedRpm = 850 + ((speed - 0.5) / 19.5) * (3000 - 850);
+            } else if (speed >= 20 && speed < 40) {
+                currentGear = '2';
+                calculatedRpm = 1200 + ((speed - 20) / 20) * (3000 - 1200);
+            } else if (speed >= 40 && speed < 60) {
+                currentGear = '3';
+                calculatedRpm = 1500 + ((speed - 40) / 20) * (3000 - 1500);
+            } else {
+                currentGear = '4';
+                // เกียร์ 4: ที่ความเร็ว 110 กม./ชม. รอบอยู่ที่ 3,000 RPM (และสเกลขึ้นต่อเนื่องตามความเร็ว)
+                calculatedRpm = 1800 + ((speed - 60) / (110 - 60)) * (3000 - 1800);
+            }
+
+            calculatedRpm = Math.round(calculatedRpm);
+
+            const isShiftAlert = (calculatedRpm >= 3000 || (currentGear === '4' && speed >= 110));
+
+            let activeDotsCount = 0;
+            if (calculatedRpm > state.idleRpmMin) {
+                const rpmProgress = Math.min(1, Math.max(0, (calculatedRpm - state.idleRpmMin) / (state.maxRpm - state.idleRpmMin)));
+                activeDotsCount = Math.floor(rpmProgress * 10);
+            }
+
+            for (let i = 1; i <= 10; i++) {
+                const ledEl = document.getElementById(`led-${i}`);
+                if (ledEl) {
+                    if (i <= activeDotsCount) ledEl.classList.add('active');
+                    else ledEl.classList.remove('active');
+                }
+            }
+
+            const aemLedCount = Math.min(8, Math.floor((calculatedRpm / 4000) * 8 + 0.0001));
+            el.aemShiftLeds.forEach((led, idx) => {
+                if (idx < aemLedCount) led.classList.add('active');
+                else led.classList.remove('active');
+            });
+
+            const isSpeedLimitExceeded = (state.currentSpeedKmh > state.speedLimit && state.speedLimit > 0);
+            if (isShiftAlert || isSpeedLimitExceeded) {
+                el.screenFrame.classList.add('alert-active');
+                playBeep();
+            } else {
+                el.screenFrame.classList.remove('alert-active');
+            }
+
+            // FT600 UI
+            el.ftMainSpeed.textContent = Math.round(displaySpeed);
+            el.ftRpmValue.textContent = calculatedRpm;
+            el.ftMaxSpeed.textContent = Math.round(displayMax);
+            el.ftAvgSpeed.textContent = Math.round(displayAvg);
+            el.ftGearDisplay.textContent = currentGear;
+
+            const ftBarPct = Math.min(100, Math.max(0, (calculatedRpm / state.maxRpm) * 100));
+            el.ftRpmBarFill.style.width = `${ftBarPct}%`;
+
+            // AEM CD-7 UI
+            el.aemGearDisplay.textContent = currentGear;
+            el.aemValSpeed.textContent = Math.round(displaySpeed);
+            el.aemValRpm.textContent = calculatedRpm;
+
+            const aemMaxRpm = 9000;
+            const aemRpmProgress = Math.min(1, Math.max(0, calculatedRpm / aemMaxRpm));
+            el.aemRpmPath.style.strokeDasharray = '1000';
+            el.aemRpmPath.style.strokeDashoffset = String(1000 * (1 - aemRpmProgress));
+
+            const tpsPct = Math.min(100, Math.max(0, (speed / 110) * 100));
+            const afrVal = (14.7 - (tpsPct * 0.02)).toFixed(1);
+            el.aemValAfr.textContent = `${afrVal}:1`;
+            el.aemTps.textContent = `${Math.round(tpsPct)}%`;
+
+            if (isShiftAlert) {
+                el.aemAlertText.textContent = `SHIFT LIGHT! CHANGE GEAR NOW (${calculatedRpm} RPM)`;
+            } else if (isSpeedLimitExceeded) {
+                el.aemAlertText.textContent = `SPEED LIMIT EXCEEDED: ${Math.round(displaySpeed)} ${state.unit.toUpperCase()}!`;
+            } else {
+                el.aemAlertText.textContent = `SYSTEM READY - NO ALERTS`;
+            }
+
+            // Stack Mode UI
+            const needleAngle = -135 + ((calculatedRpm / 8000) * 270);
+            el.stackNeedleGroup.style.transform = `rotate(${needleAngle}deg)`;
+            el.stackValSpeed.textContent = Math.round(displaySpeed);
+            el.stackValGear.textContent = currentGear;
+            el.stackValRpm.textContent = calculatedRpm;
+            el.stackValTrip.textContent = currentTrip.distanceKm.toFixed(2);
+            el.stackValTps.textContent = `${Math.round(tpsPct)}%`;
+
+            if (isShiftAlert) {
+                el.stackShiftLight.classList.add('shift-active');
+            } else {
+                el.stackShiftLight.classList.remove('shift-active');
+            }
+
+            el.valTripDist.textContent = currentTrip.distanceKm.toFixed(2);
+            el.barTps.style.width = `${tpsPct}%`;
+            el.valTpsNum.textContent = `${Math.round(tpsPct)}%`;
+        }
+
+        function updateHeadingUI(deg) {
+            const cardinals = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+            const index = Math.round(deg / 45) % 8;
+            el.valHeading.textContent = `${Math.round(deg)}° ${cardinals[index]}`;
+        }
+
+        function updateGPSAccuracyUI(accMeters) {
+            const s1 = document.getElementById('sig-1');
+            const s2 = document.getElementById('sig-2');
+            const s3 = document.getElementById('sig-3');
+            const s4 = document.getElementById('sig-4');
+
+            if (!s1 || !s2 || !s3 || !s4) return;
+
+            [s1, s2, s3, s4].forEach(s => s.className = "segment-bar-bg rounded-xs");
+
+            if (accMeters <= 50) { s1.className = "bg-green-500 rounded-xs"; el.valGpsAcc.textContent = "GOOD"; }
+            if (accMeters <= 25) { s2.className = "bg-green-500 rounded-xs"; el.valGpsAcc.textContent = "GREAT"; }
+            if (accMeters <= 12) { s3.className = "bg-green-500 rounded-xs"; el.valGpsAcc.textContent = "EXCELLENT"; }
+            if (accMeters <= 6) { s4.className = "bg-green-500 rounded-xs"; }
+            if (accMeters > 50) { s1.className = "bg-red-500 rounded-xs"; el.valGpsAcc.textContent = "WEAK"; }
+        }
+
+        function toggleDemoMode() {
+            state.isDemo = !state.isDemo;
+
+            if (state.isDemo) {
+                el.btnDemo.className = "px-2.5 py-1 rounded bg-amber-500 text-black text-xs sm:text-sm font-bold flex items-center gap-1 shadow-lg shadow-amber-500/30 relative z-30";
+                el.demoText.textContent = "SIMULATING";
+                updateGPSAccuracyUI(4);
+
+                state.demoInterval = setInterval(() => {
+                    state.demoAngle += 0.03;
+                    const simSpeed = Math.max(0, (Math.sin(state.demoAngle) * 60) + 55);
+                    state.currentSpeedKmh = simSpeed;
+
+                    const stepKm = (simSpeed / 3600) * 0.1;
+                    ['A', 'B', 'C'].forEach(tKey => {
+                        const trip = state.trips[tKey];
+                        trip.distanceKm += stepKm;
+                        if (simSpeed > trip.maxSpeedKmh) trip.maxSpeedKmh = simSpeed;
+                        trip.history.push(simSpeed);
+                    });
+
+                    const simGx = Math.sin(state.demoAngle * 2) * 1.1;
+                    const simGy = Math.cos(state.demoAngle * 1.5) * 0.9;
+                    updateGForceUI(simGx, simGy);
+
+                    updateHeadingUI((state.demoAngle * 40) % 360);
+
+                    renderDashboard();
+                }, 100);
+            } else {
+                clearInterval(state.demoInterval);
+                el.btnDemo.className = "px-2.5 py-1 rounded bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs sm:text-sm font-bold hover:bg-amber-500/30 transition flex items-center gap-1 relative z-30";
+                el.demoText.textContent = "DEMO";
+                state.currentSpeedKmh = 0;
+                renderDashboard();
+                initGPS();
+            }
+        }
+
+        async function toggleWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    if (!state.wakeLock) {
+                        state.wakeLock = await navigator.wakeLock.request('screen');
+                        el.wakelockIcon.className = "fa-solid fa-lock-open text-amber-400";
+                    } else {
+                        await state.wakeLock.release();
+                        state.wakeLock = null;
+                        el.wakelockIcon.className = "fa-solid fa-lock text-slate-300";
+                    }
+                } catch (e){}
+            }
+        }
+
+        function openSpeedLimitModal() {
+            document.getElementById('input-speed-limit').value = state.speedLimit;
+            document.getElementById('modal-speed-limit').classList.remove('hidden');
+        }
+
+        function closeSpeedLimitModal() {
+            document.getElementById('modal-speed-limit').classList.add('hidden');
+        }
+
+        function saveSpeedLimit() {
+            const val = parseFloat(document.getElementById('input-speed-limit').value) || 0;
+            state.speedLimit = val;
+            document.getElementById('limit-val-display').textContent = val;
+            closeSpeedLimitModal();
+            renderDashboard();
+        }
+
+        window.onload = function() {
+            updateNetworkStatus();
+            initGPS();
+            initAccelerometer();
+            renderDashboard();
+        };
+    </script>
+</body>
+</html>
